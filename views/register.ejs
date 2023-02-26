@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -11,142 +12,81 @@
     <link rel="icon" href="img/favicon.png" sizes="32x32" />
     <link rel="icon" href="img/favicon.png" sizes="192x192" />
     <link rel="apple-touch-icon" href="/assets/img/favicon.png" />
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+        integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/line.css">
     <link rel="stylesheet" href="css/style.css">
 
     <style>
         .row {
-        display: flex;
+            display: flex;
         }
 
         .column {
-        flex: 50%;
+            flex: 50%;
         }
     </style>
 </head>
+
 <body>
 
-    <div class="page-loader loader">
+    <!-- <div class="page-loader loader">
         <div class="cmps">
             <span class="mt-4 mx-auto d-block text-center">
                 Loading<b></b><b></b><b></b>
             </span>
         </div>
-    </div>
-
+    </div> -->
+    
     <header class="header">
-        <div class="container">
-            <section class="header--main">
-                <div class="mobile-menu">
-                    <input id="menu__toggle" class="open-nav" type="checkbox" />
-                    <label class="menu__btn" class="open" for="menu__toggle">
-                        <span></span>
-                    </label>
-                </div>
-                <div class="header--logo">
-                    <a href="./">
-                        <img src="img/light-logo.png" class="nav-logo" alt="Ora Watches &amp; Jewelery | Logo">
-                    </a>
-                </div>
-                <nav class="menu js-menu">
-                    <ul class="ul-menu">
-                        <li class="menu-item">
-                            <a href="./">Home</a>
-                        </li>
-                        <li class="menu-item menu-item-child">
-                            <a href="#" class="js-sub_menu">Products <i class="uil uil-angle-down"></i></a>
-                            <ul class="sub-menu">
-                                <li class="sub-menu-item"><a href="/products">All Products</a></li>
-                                <li class="sub-menu-item"><a href="/single-product">Single Post</a></li>
-                            </ul>
-                        </li>
-                        <li class="menu-item menu-item-child">
-                            <a href="#" class="js-sub_menu">Pages <i class="uil uil-angle-down"></i></a>
-                            <ul class="sub-menu">
-                                <li class="sub-menu-item"><a href="./log-in.html">Log In</a></li>
-                                <li class="sub-menu-item"><a href="./sign-up.html">Sign Up</a></li>
-                                <li class="sub-menu-item"><a href="./blog.html">Blog</a></li>
-                            </ul>
-                        </li>
-                        <li class="menu-item">
-                            <a href="/about-page">About</a>
-                        </li>
-                        <li class="menu-item">
-                            <a href="/contact-page" class="active">Contact Us</a>
-                        </li>
-                    </ul>
-                </nav>
-                <div class="darkLight-searchBox">
-                    <div class="dark-light">
-                        <!-- <i class="fa-solid fa-moon moon"></i> -->
-                        <!-- <i class="fa-solid fa-sun"></i> -->
-                        <i class="uil uil-moon moon"></i>
-                        <i class="uil uil-sun sun"></i>
-                    </div>
-                    <div class="searchBox">
-                        <div class="searchToggle">
-                            <!-- <i class="fa-solid fa-xmark cancel"></i> -->
-                            <!-- <i class="fa-solid fa-magnifying-glass search"></i> -->
-                            <i class="uil uil-times cancel"></i>
-                            <i class="uil uil-search search"></i>
-                        </div>
-
-                        <div class="search-field">
-                            <input type="text" placeholder="Search..." />
-                            <!-- <i class="fa-solid fa-magnifying-glass"></i> -->
-                            <i class="uil uil-search-alt"></i>
-                        </div>
-                    </div>
-                    <div class="cart-checkout">
-                        <i class="uil uil-shopping-bag shopping-cart"></i>
-                    </div>
-                    <!-- <i class="fa-solid fa-bars open-nav"></i> -->
-                </div>
-            </section>
-            <div class="progress"></div>
-        </div>
+        <%- include('partials/navbar') %>
     </header><!-- header-end ./ -->
 
     <main class="wrapper">
 
         <% JSON.stringify(messages) %>
-        <% if(messages.error) { %>
-          <div class="alert alert-danger">
-          <% for (var x of messages.error) { %>
-            <h6 align="center" style="color:red;"><%= x %></h6>
-          </div>
-          <% } %>
-        <% } %>
-        
+            <% if(messages.error) { %>
+                <div class="alert alert-danger">
+                    <% for (var x of messages.error) { %>
+                        <h6 align="center" style="color:red;">
+                            <%= x %>
+                        </h6>
+                </div>
+                <% } %>
+                    <% } %>
 
-        <section class="form-details">
-            <div class="container">
-                <div class="row">
-                    <div class="col-md-4 col-lg-4 form" style="margin: 0 auto;">
-                       
-                        <form action="/register" autocomplete="off" method="POST">
-                            
-                            
-                            <div class="form">
-      
-                                <!-- <ul class="tab-group">
+
+                        <section class="form-details">
+                            <div class="container">
+                                <div class="row">
+                                    <div class="col-md-3 col-lg-3 form" style="margin: 0 auto;">
+
+                                        <form action="/register" autocomplete="off" method="POST">
+
+
+                                            <div class="form">
+
+                                                <!-- <ul class="tab-group">
                                   <li class="tab active"><a href="#signup">Sign Up</a></li>
                                   <li class="tab"><a href="#login">Log In</a></li>
                                 </ul> -->
-                                <div class="row" style="margin: auto 0;text-align: center;">
-                                    <div class="column"> <u> <a href="/register-page" style="color:orangered;">Sign Up</a></u></div>
-                                    <div class="column"><u><a href="/login-page"  style="color:orangered;">Log In</a></u></div>
-                                </div>
+                                                <div class="row" style="margin: auto 0;text-align: center;">
+                                                    <div class="column"> <u> <a href="/register-page"
+                                                                style="color:orangered;">Sign Up</a></u></div>
+                                                    <div class="column"><u><a href="/login-page"
+                                                                style="color:orangered;">Log In</a></u></div>
+                                                </div>
 
-                                <div class="row">
-                                    <div class="column"></div>
-                                    <div class="column"></div>
-                                </div>
-                                
-                                <div class="tab-content">
-                                  <!-- <div id="signup">   
+                                                <div class="row">
+                                                    <div class="column"></div>
+                                                    <div class="column"></div>
+                                                </div>
+
+                                                <div class="tab-content">
+                                                    <!-- <div id="signup">   
                                     <h1>Sign Up for Free</h1>
                                     
                                     <form action="/" method="post">
@@ -186,71 +126,83 @@
                                     </form>
                           
                                   </div> -->
-                                  
-                                  <div id="login">
-                                    <center>
-                                        <br>
-                                    <p style="font-size:15px;text-decoration: underline;font-weight:bold;">Welcome! </p> 
-                                    <p style="font-size:15px;">Please fill out the information below</p>
-                                    
-                                    <div class="field-wrap">
-                                        <input style="text-align: center;" type="text" class="form-control" name="userName" placeholder="User Name">
-                                    </div>
-                                    
-                                      <div class="field-wrap">
-                                            <input style="text-align: center;" type="text" class="form-control" name="emailLog" placeholder="Email Address">
-                                        </div>
-                                        
-                                        <div class="field-wrap">
-                                            <input style="text-align: center;" type="password" class="form-control" name="passwordLog" placeholder="Password">
-                                        </div>
 
-                                        <!-- <div class="field-wrap">
+                                                    <div id="login">
+                                                        <center>
+                                                            <br>
+                                                            <p
+                                                                style="font-size:15px;text-decoration: underline;font-weight:bold;">
+                                                                Welcome! </p>
+                                                            <p style="font-size:15px;">Please fill out the information
+                                                                below</p>
+
+                                                            <div class="field-wrap">
+                                                                <input style="text-align: center;" type="text"
+                                                                    class="form-control" name="userName"
+                                                                    placeholder="User Name">
+                                                            </div>
+
+                                                            <div class="field-wrap">
+                                                                <input style="text-align: center;" type="text"
+                                                                    class="form-control" name="emailLog"
+                                                                    placeholder="Email Address">
+                                                            </div>
+
+                                                            <div class="field-wrap">
+                                                                <input style="text-align: center;" type="password"
+                                                                    class="form-control" name="passwordLog"
+                                                                    placeholder="Password">
+                                                            </div>
+
+                                                            <!-- <div class="field-wrap">
                                             <input style="text-align: center;" type="password" class="form-control" name="passwordLogConfirm" placeholder="Password Confirm">
                                         </div> -->
-                                        
-                                        <p class="forgot"><a href="#">Forgot Password?</a></p>
-                                        
-                                        <button style="margin-bottom:20px;font-size:15px;" class="btn btn-lg btn-primary btn-block" type="submit">Login With Email</button>
-                                    
-                                    
-                          
-                                  </div>
-                                </center>
-                                  
-                                </div><!-- tab-content -->
-                            </form>
-                          </div> <!-- /form -->
-                        
+
+                                                            <p class="forgot"><a href="#">Forgot Password?</a></p>
+
+                                                            <button style="margin-bottom:20px;font-size:15px;"
+                                                                class="btn btn-lg btn-primary btn-block"
+                                                                type="submit">Login With Email</button>
 
 
-                    
-                      
-                  
-                    </div>
 
-                    
-                </div>
-            </div>
-        </section>
-        
-        <section class="newsletter">
-            <div class="container">
-                <div class="row align-items-center">
-                    <div class="col-md-6 col-lg-8">
-                        <div class="newstext">
-                            <h4>Sign Up For Newsletters!</h4>
-                            <p>Get E-Mail updates about our Latest Products and <span>special offers</span>.</p>
-                        </div>
-                    </div>
-                    <div class="col-md-6 col-lg-4">
-                        <div class="n-form">
-                            <input type="text" placeholder="Your E-Mail Address...">
-                            <button class="btn-normal">Sign Up</button>
-                    </div>
-                </div>
-            </div>
-        </section>
+                                                    </div>
+                                                    </center>
+
+                                                </div><!-- tab-content -->
+                                        </form>
+                                    </div> <!-- /form -->
+
+
+
+
+
+
+                                </div>
+
+
+                            </div>
+                            </div>
+                        </section>
+
+                        <section class="newsletter">
+                            <div class="container">
+                                <div class="row align-items-center">
+                                    <div class="col-md-6 col-lg-8">
+                                        <div class="newstext">
+                                            <h4>Sign Up For Newsletters!</h4>
+                                            <p>Get E-Mail updates about our Latest Products and <span>special
+                                                    offers</span>.</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 col-lg-4">
+                                        <div class="n-form">
+                                            <input type="text" placeholder="Your E-Mail Address...">
+                                            <button class="btn-normal">Sign Up</button>
+                                        </div>
+                                    </div>
+                                </div>
+                        </section>
     </main><!-- main-body-end ./ -->
 
     <footer class="footer">
@@ -329,7 +281,7 @@
             <i class="uil uil-angle-up"></i>
         </button>
 
-        <div class="cookie">
+        <!-- <div class="cookie">
             <div class="welcome-alert alert alert-dismissible fade show" role="alert">
                 <section class="ms">
                     <strong>Hello, Welcome to Ora-Ks.com!</strong>
@@ -348,10 +300,13 @@
             <div class="btn-actions">
                 <button class="item">I Understand</button>
             </div>
-        </div>
+        </div> -->
     </footer><!-- footer-end ./ -->
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
+        crossorigin="anonymous"></script>
     <script src="js/script.js"></script>
 </body>
+
 </html>

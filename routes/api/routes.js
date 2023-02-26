@@ -11,6 +11,11 @@ const ObjectId = require('mongodb').ObjectID;
 const LocalStorage = require('node-localstorage').LocalStorage;
 const dotenv = require('dotenv').config();
 
+// User Model:
+const User = require("../../models/User");
+const Item = require("../../models/Item");
+const SuperUser = require("../../models/SuperUser");
+
 // Variables:
 const maxSize = 1 * 1024 * 1024; // for 1MB 
 var desiredSaves = [];
@@ -79,9 +84,925 @@ function checkFileType(file, cb){
   }
 }
 
-// ROUTES ---------------------------------------------
 
-// @route GET /
+
+// ITEM ROUTES ---------------------------------------------
+// @route GET /admin-animation
+// @desc  Renders utilities-animation page
+router.get("/admin-item-form", function (req, res) {
+  if (req.session.superuser_id) {
+    // MUST ADD QUERRY IF USER NAME DOESN EXIST AND/OR STORE IT IN SESSION!
+    req.flash("error", "SUPERUSER IDENTIFIED!")
+    const tempUser = {
+      name: req.session.superuser_name,
+      _id: req.session.superuser_id
+    }
+    res.render("admin/admin-create-item-form", {superuser: tempUser, msg: "SUPERUSER IDENTIFIED!"});
+
+  }else{
+    console.log("YOU ARE NOT THE ONE!")
+    req.flash("error", "YOU ARE NOT THE ONE!")
+    res.redirect("/");
+  }
+});
+
+
+// @route GET /api/abmin-items
+// @desc  Renders The Items
+router.post("/api/admin-create-item", function (req, res) {
+  if(req.session.superuser_id ){
+    const tempUser ={
+      name: req.session.superuser_name,
+      _id: req.session.superuser_id
+    }
+    // console.log("TEST OUT! :  "+req.body);
+    const { itemName, itemDescription, itemQuantity, itemPrice, itemImage } = req.body;
+    // Create item:
+    console.log("Data Grabbed: "+ itemName, itemDescription, itemQuantity);
+    const qtySold = 0;
+    const newItem = new Item({
+        name: itemName ,
+        description: itemDescription,
+        price: itemPrice,
+        quantity: itemQuantity,
+        image: itemImage,
+        qtySold: qtySold
+    });
+    console.log("NEW DATA BEINGINPUT: " + newItem);
+    // Save item to DB:
+    newItem.save((err) => { // Save new User into DB:
+      if (err) { // If error:
+        console.log("Error Saving Into Databse!!: RESULTS: "+ err);
+        req.flash("error", "Error Saving Into Databse!!")
+        res.redirect("/api/admin-items");
+      }else{
+        console.log("SUccessfully Added Item!");
+        req.flash("error", "Successfully Added Item!")
+        res.redirect("/api/admin-items");
+        
+      }
+    })
+  }else{
+    console.log("YOU ARE NOT THE ONE!")
+    req.flash("error", "YOU ARE NOT THE ONE!")
+    res.redirect("/");
+  }
+});
+
+// @route GET /api/abmin-items
+// @desc  Renders The Items
+router.get("/api/admin-items", function (req, res) {
+  if(req.session.superuser_id ){
+    const tempUser ={
+      name: req.session.superuser_name,
+      _id: req.session.superuser_id
+    }
+    Item.find()
+      .sort({ created_at: -1 })
+      .then(items => {
+        if (items) {
+          console.log("FoundItems!")
+          req.flash("error", "Found Items!")
+          res.render("admin/admin-show-items", {items: items, msg: 'Grabbed Available Items!', superuser: tempUser });
+        }else{
+          console.log("No Items!")
+          req.flash("error", "NO Items!")
+          return res.redirect("/");
+        }
+
+        
+    });
+  }else{
+    console.log("YOU ARE NOT THE ONE!")
+    req.flash("error", "YOU ARE NOT THE ONE!")
+    res.redirect("/");
+  }
+});
+// @route GET /api/abmin-items
+// @desc  Renders The Items
+router.get("/api/admin-items", function (req, res) {
+  if(req.session.superuser_id ){
+    const tempUser ={
+      name: req.session.superuser_name,
+      _id: req.session.superuser_id
+    }
+    Item.find()
+      .sort({ date: -1 })
+      .then(items => {
+        if (items) {
+          console.log("FoundItems!")
+          req.flash("error", "Found Items!")
+          res.render("admin/admin-show-items", {items: items, msg: 'Grabbed Available Items!', superuser: tempUser });
+        }else{
+          console.log("No Items!")
+          req.flash("error", "NO Items!")
+          return res.redirect("/");
+        }
+
+        
+    });
+  }else{
+    console.log("YOU ARE NOT THE ONE!")
+    req.flash("error", "YOU ARE NOT THE ONE!")
+    res.redirect("/");
+  }
+});
+
+
+// @route GET /api/items
+// @desc  Renders The Items
+router.get("/api/items", function (req, res) {
+  Item.find()
+    .sort({ date: -1 })
+    .then(items => {
+      if (items) {
+        console.log("No Items!")
+        req.flash("error", "NO Items!")
+        return res.redirect("/");
+      }
+      res.render("products", {items: items, msg: 'Grabbed Available Items!'});
+  });
+});
+
+// @ desc    Get ALL items
+// @ route    GET api/items
+// @ access   Public
+// router.get("/", (req, res) => {
+//   Item.find()
+//   .sort({ date: -1 })
+//   .then(items => res.json(items))
+//   .catch(err => res.status(404).json({message: "Error", error: err}))
+// });
+
+// @ desc    Create A New Item
+// @ route    POST api/items
+// @ access   Public
+router.post("/api/items/create", (req, res) => {
+
+  const { name, description, quantity, price, image, qtySold } = req.body;
+  // Create item:
+  const newItem = new Item({
+      name,
+      description,
+      price,
+      quantity,
+      image,
+      qtySold
+  });
+  // Save item to DB:
+  if (items) {
+    console.log("No Items!")
+    req.flash("error", "NO Items!")
+    return res.redirect("/");
+  }
+  res.render("products", {items: items, msg: 'Grabbed Available Items!'});
+
+
+  // newItem.save().then(item => res.status(200).json(item))
+  // .catch(err => res.status(400).json({message: "Error", error: err}))
+});
+
+// @ route    POST api/items/:id
+// @ desc    Delete a Item:
+// @ access   Public
+router.post("/api/admin-delete-item", (req, res) => {
+  console.log("ITEM ID output: " + req.body.item_id)
+  if(req.session.superuser_id ){
+    Item.findById(req.body.item_id)
+      .then(item => {
+        if (item) {
+          console.log("FoundItem!");
+          item.remove().then(() => {
+            console.log("Delete Item!");
+            req.flash("error", "Deleted Item!")
+            res.redirect("/api/admin-items")
+          });
+
+          
+          // res.render("admin/admin-show-items", {items: items, msg: 'Grabbed Available Items!', superuser: tempUser });
+        }else{
+          console.log("Couldnt find item by ID!")
+          req.flash("error", "Couldnt Find Item By That ID!")
+          return res.redirect("/api/admin-items");
+        }
+    });
+  }else{
+    console.log("YOU ARE NOT THE ONE!")
+    req.flash("error", "YOU ARE NOT THE ONE!")
+    res.redirect("/");
+  }
+});
+
+
+
+
+
+
+//  RIGHT HERE! UPDATE ITEM!
+
+router.post("/admin-item-update-form", function (req, res) {
+  console.log("ITEM ID output: " + req.body.item_id)
+  if (req.session.superuser_id) {
+    // MUST ADD QUERRY IF USER NAME DOESN EXIST AND/OR STORE IT IN SESSION!
+    const tempUser = {
+      name: req.session.superuser_name,
+      _id: req.session.superuser_id
+    }
+    console.log("ITEM ID output: " + req.body.item_id)
+    Item.findById(req.body.item_id)
+      .then(item => {
+        if (item) {
+          console.log("FoundItem!");
+          req.flash("error", "Found Item")
+          res.render("admin/admin-update-item-form", {item: item, superuser: tempUser, msg: "SUPERUSER IDENTIFIED!"});
+        }else{
+          console.log("Couldnt Find Item!");
+          req.flash("error", "Couldnt find item")
+          res.redirect("/api/admin-items");
+        }})
+  }else{
+    console.log("YOU ARE NOT THE ONE!")
+    req.flash("error", "YOU ARE NOT THE ONE!")
+    res.redirect("/");
+  }
+});
+
+// @ route    PUT api/items/ID
+// @ desc    Edit Item By ID Route
+// @ access   Private
+router.post("/api/admin-update-item", (req, res) => {
+  console.log("ITEM ID output: " + req.body.item_id)
+  // console.log("ID", req.params.id)
+  Item.findById(req.body.item_id, (err, item) => {
+      if (err) {
+        req.flash("error", "Fields are empty")
+        return res.redirect("/admin-item-update-form");
+      }
+      else {
+        const { itemName, itemPrice, itemQuantity, itemQtySold, itemImage, itemDescription } = req.body;
+        const newItem = {
+          name: itemName,
+          price: itemPrice,
+          quantity: itemQuantity,
+          qtySold: item.qtySold, 
+          image: itemImage,
+          description: itemDescription
+        }
+          // Weird way of doing so as usually entries wont even get this far, but if the entries are null, this will hit
+                    
+        console.log("Updated new item: ", newItem);
+        
+        // res.send(result);
+        Item.updateOne({ "_id": new ObjectId(req.body.item_id)}, {$set: newItem}, (error, result) => {
+          if(error) {
+              // return res.status(500).send(error);
+              console.log("Upadte Item", error)
+              req.flash("error", "Failed to Update Item");
+              return res.redirect("/api/admin-items")
+          }
+          console.log("Successfully Updated!")
+          req.flash("error", "Updated Item");
+          return res.redirect("/api/admin-items");
+        });
+    
+      }
+  });
+});
+
+// @ route    GET api/items/ID
+// @ desc    Show one item by ID
+// @ access   Private
+router.get("/items/:id", (req, res) => {
+  Item.findById(req.params.id, (err, item) => {
+      if (err) {
+          // res.json({ message: "Error", error: "ID doesn't exist..." });
+          res.redirect("/api/index")
+      }else{
+          // res.json({ message: "Success", data: item });
+          res.render("api/products");
+      }
+  });
+});``
+
+
+
+//     END OF ITEM ROUTES:     ------------
+
+
+
+
+
+// SUPER USER ROUTES  ---------------------------------------------
+
+// TEND HEST ADMIN MENUS 
+
+
+// @route GET /items-admin-menu-test
+// @desc  Renders aasdasasdaf
+// router.get("/admin-test", function (req, res) {
+//   res.render("admin/admin-menu");
+// });
+
+// @route POST /admin-logout
+// @desc  Logout A SUPERUSER ADMIN
+router.post("/admin-logout", (req, res) => {
+  req.session.superuser_id = null;
+  res.redirect("/")
+});
+
+// @route GET /admin-animation
+// @desc  Renders utilities-animation page
+router.get("/admin-animation", function (req, res) {
+  if (req.session.superuser_id) {
+    // MUST ADD QUERRY IF USER NAME DOESN EXIST AND/OR STORE IT IN SESSION!
+    req.flash("error", "SUPERUSER IDENTIFIED!")
+    const tempUser = {
+      name: req.session.superuser_name,
+      _id: req.session.superuser_id
+    }
+    res.render("admin/utilities-animation", {superuser: tempUser, msg: "SUPERUSER IDENTIFIED!"});
+
+  }else{
+    console.log("YOU ARE NOT THE ONE!")
+    req.flash("error", "YOU ARE NOT THE ONE!")
+    res.redirect("/");
+  }
+});
+
+// @route GET /admin-borders
+// @desc  Renders utilities-borders page
+router.get("/admin-borders", function (req, res) {
+  if (req.session.superuser_id) {
+    // MUST ADD QUERRY IF USER NAME DOESN EXIST AND/OR STORE IT IN SESSION!
+    req.flash("error", "SUPERUSER IDENTIFIED!")
+    const tempUser = {
+      name: req.session.superuser_name,
+      _id: req.session.superuser_id
+    }
+    res.render("admin/utilities-borders", {superuser: tempUser, msg: "SUPERUSER IDENTIFIED!"});
+
+  }else{
+    console.log("YOU ARE NOT THE ONE!")
+    req.flash("error", "YOU ARE NOT THE ONE!")
+    res.redirect("/");
+  }
+});
+
+// @route GET /admin-color
+// @desc  Renders utilities-color page
+router.get("/admin-color", function (req, res) {
+  if (req.session.superuser_id) {
+    // MUST ADD QUERRY IF USER NAME DOESN EXIST AND/OR STORE IT IN SESSION!
+    req.flash("error", "SUPERUSER IDENTIFIED!")
+    const tempUser = {
+      name: req.session.superuser_name,
+      _id: req.session.superuser_id
+    }
+    res.render("admin/utilities-color", {superuser: tempUser, msg: "SUPERUSER IDENTIFIED!"});
+
+  }else{
+    console.log("YOU ARE NOT THE ONE!")
+    req.flash("error", "YOU ARE NOT THE ONE!")
+    res.redirect("/");
+  }
+});
+
+// @route GET /admin-other
+// @desc  Renders utilities-color page
+router.get("/admin-other", function (req, res) {
+  if (req.session.superuser_id) {
+    // MUST ADD QUERRY IF USER NAME DOESN EXIST AND/OR STORE IT IN SESSION!
+    req.flash("error", "SUPERUSER IDENTIFIED!")
+    const tempUser = {
+      name: req.session.superuser_name,
+      _id: req.session.superuser_id
+    }
+    res.render("admin/utlities-other", {superuser: tempUser, msg: "SUPERUSER IDENTIFIED!"});
+
+  }else{
+    console.log("YOU ARE NOT THE ONE!")
+    req.flash("error", "YOU ARE NOT THE ONE!")
+    res.redirect("/");
+  }
+});
+
+// @route GET /admin-tables
+// @desc  Renders tables page
+router.get("/admin-tables", function (req, res) {
+  if (req.session.superuser_id) {
+    // MUST ADD QUERRY IF USER NAME DOESN EXIST AND/OR STORE IT IN SESSION!
+    req.flash("error", "SUPERUSER IDENTIFIED!")
+    const tempUser = {
+      name: req.session.superuser_name,
+      _id: req.session.superuser_id
+    }
+    res.render("admin/tables", {superuser: tempUser, msg: "SUPERUSER IDENTIFIED!"});
+
+  }else{
+    console.log("YOU ARE NOT THE ONE!")
+    req.flash("error", "YOU ARE NOT THE ONE!")
+    res.redirect("/");
+  }
+});
+
+// @route GET /admin-cards
+// @desc  Renders cards page
+router.get("/admin-cards", function (req, res) {
+  if (req.session.superuser_id) {
+    // MUST ADD QUERRY IF USER NAME DOESN EXIST AND/OR STORE IT IN SESSION!
+    req.flash("error", "SUPERUSER IDENTIFIED!")
+    const tempUser = {
+      name: req.session.superuser_name,
+      _id: req.session.superuser_id
+    }
+    res.render("admin/cards", {superuser: tempUser, msg: "SUPERUSER IDENTIFIED!"});
+
+  }else{
+    console.log("YOU ARE NOT THE ONE!")
+    req.flash("error", "YOU ARE NOT THE ONE!")
+    res.redirect("/");
+  }
+});
+
+// @route GET /admin-charts
+// @desc  Renders charts page
+router.get("/admin-charts", function (req, res) {
+  if (req.session.superuser_id) {
+    // MUST ADD QUERRY IF USER NAME DOESN EXIST AND/OR STORE IT IN SESSION!
+    req.flash("error", "SUPERUSER IDENTIFIED!")
+    const tempUser = {
+      name: req.session.superuser_name,
+      _id: req.session.superuser_id
+    }
+    res.render("admin/charts", {superuser: tempUser, msg: "SUPERUSER IDENTIFIED!"});
+
+  }else{
+    console.log("YOU ARE NOT THE ONE!")
+    req.flash("error", "YOU ARE NOT THE ONE!")
+    res.redirect("/");
+  }
+});
+
+
+// @route GET /admin-forgot-password
+// @desc  Renders forgot-password page
+router.get("/admin-forgot-password", function (req, res) {
+  if (req.session.superuser_id) {
+    // MUST ADD QUERRY IF USER NAME DOESN EXIST AND/OR STORE IT IN SESSION!
+    req.flash("error", "SUPERUSER IDENTIFIED!")
+    const tempUser = {
+      name: req.session.superuser_name,
+      _id: req.session.superuser_id
+    }
+    res.render("admin/forgot-password", {superuser: tempUser, msg: "SUPERUSER IDENTIFIED!"});
+
+  }else{
+    console.log("YOU ARE NOT THE ONE!")
+    req.flash("error", "YOU ARE NOT THE ONE!")
+    res.redirect("/");
+  }
+});
+
+
+// @route GET /admin-buttons
+// @desc  Renders buttons page
+router.get("/admin-buttons", function (req, res) {
+  if (req.session.superuser_id) {
+    // MUST ADD QUERRY IF USER NAME DOESN EXIST AND/OR STORE IT IN SESSION!
+    req.flash("error", "SUPERUSER IDENTIFIED!")
+    const tempUser = {
+      name: req.session.superuser_name,
+      _id: req.session.superuser_id
+    }
+    res.render("admin/buttons", {superuser: tempUser, msg: "SUPERUSER IDENTIFIED!"});
+
+  }else{
+    console.log("YOU ARE NOT THE ONE!")
+    req.flash("error", "YOU ARE NOT THE ONE!")
+    res.redirect("/");
+  }
+});
+
+
+// @route GET /admin-blank  
+// @desc  Renders blank page
+router.get("/admin-blank", function (req, res) {
+  if (req.session.superuser_id) {
+    // MUST ADD QUERRY IF USER NAME DOESN EXIST AND/OR STORE IT IN SESSION!
+    req.flash("error", "SUPERUSER IDENTIFIED!")
+    const tempUser = {
+      name: req.session.superuser_name,
+      _id: req.session.superuser_id
+    }
+    res.render("admin/blank", {superuser: tempUser, msg: "SUPERUSER IDENTIFIED!"});
+
+  }else{
+    console.log("YOU ARE NOT THE ONE!")
+    req.flash("error", "YOU ARE NOT THE ONE!")
+    res.redirect("/");
+  }
+});
+
+
+// @route GET /admin-navbar
+// @desc  Renders renders admin nav bar with session name
+router.get("/admin-navbar", function (req, res) {
+    if (req.session.superuser_id) {
+      // MUST ADD QUERRY IF USER NAME DOESN EXIST AND/OR STORE IT IN SESSION!
+      req.flash("error", "SUPERUSER IDENTIFIED!")
+      const tempUser = {
+        name: req.session.superuser_name,
+        _id: req.session.superuser_id
+      }
+      res.render("/admin/admin-partials/admin-navbar", {superuser: tempUser, msg: "SUPERUSER IDENTIFIED!"});
+  
+    }else{
+      console.log("YOU ARE NOT THE ONE!")
+      req.flash("error", "YOU ARE NOT THE ONE!")
+      res.redirect("/");
+    }
+  });
+
+// @route GET /admin-404
+// @desc  Renders 4040 page
+router.get("/admin-404", function (req, res) {
+  if (req.session.superuser_id) {
+    // MUST ADD QUERRY IF USER NAME DOESN EXIST AND/OR STORE IT IN SESSION!
+    req.flash("error", "SUPERUSER IDENTIFIED!")
+    const tempUser = {
+      name: req.session.superuser_name,
+      _id: req.session.superuser_id
+    }
+    res.render("admin/404", {superuser: tempUser, msg: "SUPERUSER IDENTIFIED!"});
+
+  }else{
+    console.log("YOU ARE NOT THE ONE!")
+    req.flash("error", "YOU ARE NOT THE ONE!")
+    res.redirect("/");
+  }
+});
+
+// @route GET /admin-404
+// @desc  Renders 4040 page
+router.get("/admin-snap", function (req, res) {
+  res.render("admin-snap");
+});
+
+
+
+
+
+
+// TEND HEST ADMIN MENUS 
+
+
+
+
+
+// @route GET /admin-SwordFish
+// @desc  Renders The Super user Login page
+router.get("/admin-SwordFish", function (req, res) {
+  res.render("admin-login");
+});
+
+// @route GET /admin-register-SwordFish
+// @desc  Renders Suoper user register page
+router.get("/admin-register-SwordFish", function (req, res) {
+  res.render("admin-register");
+});
+
+
+// @route GET /admin-menu
+// @desc  Renders The Super User Control Menu
+router.get("/admin-menu", function (req, res) {
+  // res.render("admin-test");
+  if (req.session.superuser_id) {
+    const tempUser = {
+      name: req.session.superuser_name,
+      _id: req.session.superuser_id
+    }
+    // MUST ADD QUERRY IF USER NAME DOESN EXIST AND/OR STORE IT IN SESSION!
+    req.flash("error", "SUPERUSER IDENTIFIED!")
+    res.render("admin/admin-menu", {superuser: tempUser, msg: "SUPERUSER IDENTIFIED!"});
+
+  }else{
+    console.log("YOU ARE NOT THE ONE!")
+    req.flash("error", "YOU ARE NOT THE ONE!")
+    res.redirect("/");
+  }
+});
+
+
+
+// LOGIN ADMIN:  ------------
+
+// NOTE HERE! LEFT OFF ON LOGIN HERE!
+// @route  POST /login
+// @desc  For Logging In A User
+router.post('/admin-login', (req, res) => {
+  console.log("hitting here login-admin");
+  // console.log("TEST REQ BODY: "+ req.body.emailLog);
+  const { emailAdmin, passwordAdmin } = req.body;
+  const emailLower = emailAdmin.toLowerCase();
+  console.log("CURRENT GRAB OF DATA EMAIL  ADMIN : "+ emailLower);
+  console.log("CURRENT GRAB OF DATA PASS:  ADMIN : "+ passwordAdmin);
+
+  // Simple validation:
+  if (!emailAdmin || !passwordAdmin) {
+    console.log("Please Enter All Login Fields!")
+    req.flash("error", "Please Enter All Login Fields")
+    res.redirect("/admin-SwordFish");
+  }
+  else {
+    // Query DB For User By Specified Email:
+    SuperUser.findOne({ email: emailLower }, function (err, superuser) {
+      if (err) {
+        req.flash("error", "superuser Doesnt Exists");
+        res.redirect("/admin-SwordFish");
+      }
+      else {
+        if (superuser) { // superuser was found
+          console.log("found superuser with email ADMIN " + superuser.email);
+          // Comparing Password with stored hash vs superuser input:
+          bcrypt.compare(passwordAdmin, superuser.password, function (err, result) {
+            if (result) { // If Password is a match, then throw superuser ID into session and route to profile page:
+              console.log("HITTING HERE! Admin Login");
+              req.session.superuser_id = superuser._id; // Throwing ID into session:
+              req.session.superuser_name = superuser.name; // Throwing name into session:
+              
+              res.render("admin/admin-menu", {superuser: superuser, msg: "Successfully Logged in! Welcome Back!"});
+              console.log("HITTING HERE! 2  ADmin login what in session: "+ req.session.superuser_name);
+              console.log("HITTING HERE! 2  ADmin login what in session: "+ req.session.superuser_id);
+            }
+            else { // Else passwords did not match with stored hash:
+              console.log("Wrong Password!");
+              req.flash("error", "Wrong Password!");
+              res.redirect("/admin-SwordFish");  
+            }
+          });
+        }
+        else { // superuser not found
+          console.log("superuser Not Found!1");
+          req.flash("error", "superuser Not found");
+          res.redirect("/admin-SwordFish");
+        }
+      }
+    })
+  }
+});
+
+
+
+// @route POST /admin-register
+// @desc  Registers A New SUPER USER ADMIN:
+router.post("/admin-register", (req, res) => {
+  var isTheOne = false;
+  // Destructuring, Pulling the values out from request.body
+  const { emailAdmin, passwordAdmin, godcode, userName } = req.body;
+  let lowerEmail = emailAdmin.toLowerCase();
+  
+  // console.log("email lower case", lowerEmail);
+  console.log("Data being grabbed is :", req.body);
+
+   if(!godcode || godcode === ""){
+    console.log("Please enter the NEO CODE!")
+    req.flash("error", "Please enter the NEO CODE!")
+    res.redirect("/admin-register-SwordFish");
+  }
+  console.log("GOD CODE OUTPUT: "+ process.env.GODCODE);
+  if(JSON.stringify(process.env.GODCODE) === JSON.stringify(godcode)){
+    console.log(" OMG IT DOES EQUAL IT! :D ");  
+  }
+
+  
+
+  if(JSON.stringify(process.env.GODCODE) === JSON.stringify(godcode)){
+    isTheOne = true;
+    console.log("YOU ARE THE ONE! ACCESS GRANTED! CONTINUEING DEEPER! ")
+  }else{
+    isTheOne = false;
+    console.log("YOU ARE NOT THE ONE! ACCESS DENIED!")
+    req.flash("error", "YOU ARE NOT THE ONE! ACCESS DENIED!")
+    res.redirect("/admin-register-SwordFish");
+    
+  }
+  
+  
+  if(!userName || userName === ""){
+    
+    console.log("Name Is blank")
+    req.flash("error", "Please Enter A Name")
+    res.redirect("/admin-register-SwordFish");
+  }
+  else if(!emailAdmin || emailAdmin === ""){
+    console.log("email Is blank")
+    req.flash("error", "Please Enter An Email")
+    res.redirect("/admin-register-SwordFish");
+  }
+  else if(!emailREGEX.test(emailAdmin)){
+    console.log("Invalid Email")
+    req.flash("error", "Please Enter A Valid Email")
+    res.redirect("/admin-register-SwordFish");
+  }
+  else if(!passwordAdmin || passwordAdmin === ""){
+    console.log("Password Is blank");
+    req.flash("error", "Please Enter A Password");
+    res.redirect("/admin-register-SwordFish");
+    }else{
+    // ENd of validation ------------
+    // Check for existing user:
+    SuperUser.findOne({ email: emailAdmin })
+      .then(superuser => {
+        if (superuser) {
+          console.log("superuser Already Exists!")
+          req.flash("error", "superuser Already Exists!")
+          return res.redirect("/admin-register-SwordFish");
+        }
+        const newSuperUser = new SuperUser({
+          name: userName,
+          email: lowerEmail,
+          password: passwordAdmin,
+          isTheOne: true
+        });
+        // Create salt and hashed password utilizing bcrypt:
+        if(newSuperUser.isTheOne){
+
+          bcrypt.genSalt(10, (err, salt) => {
+            bcrypt.hash(newSuperUser.password, salt, (err, hash) => {
+              if (err) throw err
+              newSuperUser.password = hash;
+              console.log("HASHED Password", hash);
+              newSuperUser.save((err) => { // Save new User into DB:
+                if (err) { // If error:
+                  console.log("Error Saving Into Databse!!: RESULTS: "+ err);
+                  req.flash("error", "Error Saving Into Databse!!")
+                  return res.redirect("/admin-register-SwordFish");
+                }else{
+                  console.log("success Adding into the data base!");
+                 // Add ID Into Session:
+                  req.session.superUser_id = newSuperUser._id;
+                  // Send Email Function with nodemailer:
+                  // sendEmail(email, name) HERE! MOTE! SENDING EMAIL CALL! :
+                  // Render Profile page with New user info:
+                  res.render("/admin-menu", {superuser: newSuperUser, msg: `YOU ARE THE ONE!`});
+
+                }
+              });
+              
+              
+            });
+          });
+
+        }
+        
+      });
+  } 
+});
+
+
+
+
+// END OF SUPER USER FUNCTIONALITY------------------------
+
+
+
+
+// @route GET /success
+// @desc  The TypeCast Official Logged In Home Page - *NOTE* Old, No longer being used but left it here for now:
+router.get("/success", function (req, res) {
+  if (req.session.user_id) {
+    User.findOne({ _id: req.session.user_id }, function (err, user) {
+      if (err) {
+        req.flash("error", "Must be logged in!")
+        res.redirect("/");
+      }
+      else {
+        res.render("profile", { user: user });
+      }
+    });
+  }
+  else {
+    req.flash("error", "Must be logged in!")
+    res.redirect("/");
+  }
+});
+
+// @route POST /logout
+// @desc  Logout A User
+router.post("/logout", (req, res) => {
+  req.session.user_id = null;
+  res.redirect("/")
+});
+
+// @route POST /register
+// @desc  Registers A New User
+router.post("/register", (req, res) => {
+  // Destructuring, Pulling the values out from request.body
+  const { emailLog, passwordLog, userName } = req.body;
+  let lowerEmail = emailLog.toLowerCase();
+  // console.log("email lower case", lowerEmail);
+  console.log("Data being grabbed is :", req.body);
+  
+  if(!userName || userName === ""){
+    console.log("Name Is blank")
+    req.flash("error", "Please Enter A Name")
+    res.redirect("/register-page");
+  }
+  else if(!emailLog || emailLog === ""){
+    console.log("email Is blank")
+    req.flash("error", "Please Enter An Email")
+    res.redirect("/register-page");
+  }
+  else if(!emailREGEX.test(emailLog)){
+    console.log("Invalid Email")
+    req.flash("error", "Please Enter A Valid Email")
+    res.redirect("/register-page");
+  }
+  // else if(!gender || gender === "" || gender === "default"){
+  //   console.log("Gender Is blank")
+  //   req.flash("error", "Please Enter A Gender")
+  //   res.redirect("/register-page");
+  // }
+  else if(!passwordLog || passwordLog === ""){
+
+    console.log("Password Is blank");
+    req.flash("error", "Please Enter A Password");
+    res.redirect("/register-page");
+  // }else if(password != password2){
+  //   console.log("Passwords DO NOt match!")
+  //   req.flash("error", "Passwords Do not Match!")
+  //   res.redirect("/register-page");
+  // }else{
+    }else{
+    // ENd of validation ------------
+    // Check for existing user:
+    User.findOne({ email: emailLog })
+      .then(user => {
+        if (user) {
+          console.log("User Already Exists!")
+          req.flash("error", "User Already Exists!")
+          return res.redirect("/");
+        }
+        // Credits function:
+        credits = genCredits();
+
+        // Create new User With generated Premium credits and declaring default photo path for img:
+        // const newUser = new User({
+        //   name: userName,
+        //   email: lowerEmail,
+        //   zipcode,
+        //   nickname,
+        //   phone,
+        //   gender,
+        //   country,
+        //   password: passwordLog,
+        //   premium_credits: credits,
+        //   img: "../uploads/default-photo.jpg"
+        // })
+        const newUser = new User({
+          name: userName,
+          email: lowerEmail,
+          password: passwordLog
+        })
+        // Create salt and hashed password utilizing bcrypt:
+        bcrypt.genSalt(10, (err, salt) => {
+          bcrypt.hash(newUser.password, salt, (err, hash) => {
+            if (err) throw err
+            newUser.password = hash;
+            console.log("HASHED Password", hash);
+            newUser.save((err) => { // Save new User into DB:
+              if (err) { // If error:
+                console.log("User Already Exists!")
+                req.flash("error", "User Already Exists")
+                return res.redirect("/");
+              }
+            })
+            console.log("success")
+            // Add ID Into Session:
+            req.session.user_id = newUser._id;
+            // Send Email Function with nodemailer:
+            // sendEmail(email, name) HERE! MOTE! SENDING EMAIL CALL! :
+            // Render Profile page with New user info:
+            res.render("profile", {user: newUser, msg: 'Account Created! Please Check Your Email!'});
+            
+          });
+        });
+      });
+  }
+});
+
+
+
+
+// END LOGIN ADMIN ----------
+
+
+
+// USER ROUTES  ---------------------------------------------
+
+
+
+// @route GET /api/users/
 // @desc  Renders The Index/Login Reg Page
 router.get("/", function (req, res) {
   res.render("index");
@@ -401,12 +1322,12 @@ router.get("/success", function (req, res) {
   }
 });
 
-// @route POST /logout
-// @desc  Logout A User
-router.post("/logout", (req, res) => {
-  req.session.user_id = null;
-  res.redirect("/")
-});
+// // @route POST /logout
+// // @desc  Logout A User
+// router.post("/logout", (req, res) => {
+//   req.session.user_id = null;
+//   res.redirect("/")
+// });
 
 // @route POST /register
 // @desc  Registers A New User
@@ -490,7 +1411,6 @@ router.post("/register", (req, res) => {
   // }else{
     }else{
     // ENd of validation ------------
-    // Check for existing user:
     User.findOne({ email: emailLog })
       .then(user => {
         if (user) {

@@ -5,41 +5,22 @@ const dotenv = require('dotenv').config();
 const bodyParser = require("body-parser");
 // const config = require("config");
 
-
 const port = process.env.PORT;
 const path = require("path");
 const passport = require("passport");
 const colors = require("colors");
+const Items = require("./routes/api/items");
+const Users = require("./routes/api/users");
 
 // Modules:
 const Routes = require("./routes/api/routes");
 const User = require("./models/User");
-
-
 
 // Db Config:
 // const db = config.get("mongoURI");
 const connectDB = require("./config/db");
 // const sessionSecret = process.env.SESSION_SECRET;
 connectDB();
-
-// /* Testing Grounds for encoded: */
-
-// app.set("views", path.join(__dirname, "./views"));
-// app.set("view engine", "ejs");
-// app.use(body_parser.urlencoded({extended: true}));
-// mongoose.connect("mongodb://localhost/quoting_dojo"); // if db doesnt exist one wil be created
-// app.use(express.static(__dirname + "/public"));
-
-// /* END*/
-
-// app.use(express.json());
-// app.use(express.urlencoded({ extended: false }));
-// DECLARE STATIC FOLDER FOR SAID PROPERTIES SUCH AS CSS AND IMAGES, BUt as well Declare Structure for  ICon and everything IF needed in the future :D
-// app.use(express.static(path.join(__dirname + "/public")));
-// app.use(favicon(path.join(__dirname +'/public/images/favicon.ico')));
-
-
 
 // Passport Middleware:
 app.use(passport.initialize());
@@ -78,6 +59,8 @@ app.use(flash());
 
 // Routes:
 app.use("/", Routes);
+// app.use("/api/users", Users);
+// app.use("/api/items", Items);
 
 
 // Listening
